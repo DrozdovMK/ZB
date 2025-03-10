@@ -1,0 +1,6 @@
+hit
+hit_series
+saw
+perelaz
+wind
+unknown

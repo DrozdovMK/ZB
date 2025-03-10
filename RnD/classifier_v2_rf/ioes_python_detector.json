@@ -1,0 +1,23 @@
+{
+    "coordinates": [
+        {
+            "x": 12.34,
+            "y": 56.78
+        }
+    ],
+    "id": "py",
+    "name": "python",
+    "port": 12185,
+    "script": "main.py",
+    "serialNumber": "",
+    "sources": {
+        "ioes_opal0a0": [
+            {
+                "channel": 455,
+                "id": "Test",
+                "name": "Test"
+            }
+        ]
+    },
+    "threshold": 0.5
+}

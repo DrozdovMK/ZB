@@ -1,0 +1,15 @@
+[Unit]
+Description=Outpost DD Python detector
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+StandardOutput=journal
+WorkingDirectory=/usr/local/ioes_services/ioes_python_detector
+ExecStart=/usr/local/ioes_services/ioes_python_detector/ioes_python_detector
+
+[Install]
+WantedBy=default.target

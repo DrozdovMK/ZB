@@ -1,0 +1,7 @@
+mains/catboost_info/
+__pycache__/
+catboost_info/
+fun/
+old_files/
+data/
+.vscode/

@@ -15,7 +15,7 @@ async def connect_to_data_server(data_socket_path):
             reader, writer = await asyncio.open_unix_connection(data_socket_path)
             print('das driver connected')
             return reader, writer
-            break
+        
         except Exception:
             print('', end="\rconnecting to das driver" + dots)
             await asyncio.sleep(3)

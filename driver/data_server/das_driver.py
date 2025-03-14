@@ -15,6 +15,7 @@ from das_driver_graphics import ADCPlot
 sock_msg = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+# что в этих data?
 data_01 = bytearray(b'\xcc\xdd\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00')
 data_02 = bytearray(b'\xcc\xdd\x01\x02\x00\x00\x00\x00\x00\x02\x00\x00')
 data_03 = bytearray(b'\xcc\xdd\x01\x03\x00\x00\x96\xf8')

@@ -4,7 +4,7 @@ import os
 import sys
 import numpy as np
 
-one_second = 1024
+one_second = 1024 # Почему 1024
 delimiter = bytearray(b'<<<EndOfData.>>>')
 
 
@@ -27,8 +27,8 @@ async def connect_to_data_server(data_socket_path):
 
 
 async def data_receiver(data_socket_path):
-    global delimiter
-    await asyncio.sleep(2)
+    global delimiter # Это же по сути необязательно
+    await asyncio.sleep(2) 
     buffer = bytearray()
     data_window = np.array([])
 

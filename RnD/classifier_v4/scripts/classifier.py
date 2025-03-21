@@ -39,7 +39,7 @@ class Classifier():
         ax[0].set_ylabel('Amplitude')
         ax[0].set_title('Interaction (raw signal from interferometer)')
         ax[0].grid()
-        
+        ax[0].set_ylim([0, 16500])
         norm = mcolors.Normalize(vmin=0, vmax=1)
         cmap = mcolors.LinearSegmentedColormap.from_list("custom_red", ["#ffcccc", "#ff0000"])
         

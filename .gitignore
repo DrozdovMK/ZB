@@ -5,3 +5,4 @@ fun/
 old_files/
 data/
 .vscode/
+*.pkl

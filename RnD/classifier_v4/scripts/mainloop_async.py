@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import json
 import asyncio
+import multiprocessing as mp
 from threading import Timer
 import matplotlib.pyplot as plt
 from detector import Detector
@@ -53,7 +54,6 @@ class Mainloop():
         self.driver_one_second = 1024 # настройка для драйвера
         self.driver_delimiter = bytearray(b'<<<EndOfData.>>>') # разделитель конца сообщения
         self.data_socket_path = data_socket_path
-        self.hit_count = 0
         
         with open('das_config.json') as json_file:
             self.config_dict = json.load(json_file)
@@ -78,8 +78,8 @@ class Mainloop():
                 traceSize = jsonHdrObj['traceSize']
                 byteData = buffer[delimiterJSON + 1: delimiterJSON + numTraces * traceSize * 2 + 1]
                 data_np = np.frombuffer(byteData, dtype=np.uint16).reshape(numTraces, traceSize)
-                
                 data_window = np.vstack((data_window, data_np)) if data_window.size else data_np
+                
                 if data_window.shape[0] >= self.config_dict['time_window'] + self.driver_one_second:
                     data_window = np.roll(data_window, shift=-self.driver_one_second, axis=0)
                     data_window = np.delete(data_window, np.s_[-self.driver_one_second:], axis=0)
@@ -104,7 +104,6 @@ class Mainloop():
             except asyncio.exceptions.IncompleteReadError:
                 buffer.clear()
                 reader, _ = await connect_to_data_server(self.data_socket_path)
-            
 
     def start_test(self, path_to_test_signal, step=1000):
         test_data = np.load(path_to_test_signal)

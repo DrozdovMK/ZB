@@ -1,8 +1,7 @@
 import os
 import sys
 import asyncio
-import multiprocessing as mp
-from multiprocessing import Manager
+import threading 
 scripts_folder = "scripts/"
 sys.path.append(scripts_folder)
 #script_curdir = os.path.dirname(os.path.abspath(__file__)) # директория исполняемого скрипта
@@ -27,15 +26,9 @@ async def main(zone):
     )
     await mainloop.start()
 
-def run_asyncio_main(zone):
-    asyncio.run(main(zone))
 
 if __name__ == '__main__':
-    zones = [455, 560]
-    processes = []
-    for zone in zones:
-        p = mp.Process(target=run_asyncio_main, args=(zone,))
-        processes.append(p)
-        p.start()
-    for p in processes:
-        p.join()
+    if len(sys.argv) < 2:
+        print("you must specify zone number")
+    zone_num = sys.argv[1]
+    asyncio.run(main(zone_num)) 

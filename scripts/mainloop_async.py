@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import json
 import asyncio
+import matplotlib.pyplot as plt
 from detector import Detector
 from cropper import Cropper
 from preprocessing import Preprocessor, central_chl
@@ -37,7 +38,7 @@ class Mainloop():
     
     async def start(self):
 
-        reader, _ = await self.connect_to_data_server(self.data_socket_path)
+        reader, _ = await connect_to_data_server(self.data_socket_path)
         buffer = bytearray()
         data_window = np.array([])
         while True:
@@ -56,11 +57,20 @@ class Mainloop():
                 if data_window.shape[0] >= self.config_dict['time_window'] + self.driver_one_second:
                     data_window = np.roll(data_window, shift=-self.driver_one_second, axis=0)
                     data_window = np.delete(data_window, np.s_[-self.driver_one_second:], axis=0)
+                    print(data_window.shape)
                     self.stored_signal = self.cropper(data_window[:, self.zone_num])
                     if self.stored_signal is None:
                         pass
                     else:
-                        print(self.stored_signal.shape)
+                        print('signal collected', self.stored_signal.shape)
+                        predictions = self.classifier.predict(self.stored_signal)
+                        if self.plotting:
+                            self.classifier.plot(self.stored_signal, predictions)
+                        if self.saving:
+                            self.saver.save_alarm(self.stored_signal, predictions)
+                        if self.verbose:
+                            print(json.dumps(predictions))
+                            sys.stdout.flush()
                 buffer.clear()
             except asyncio.exceptions.LimitOverrunError as e:
                 buffer += await reader.read(e.consumed)
@@ -68,17 +78,7 @@ class Mainloop():
                 buffer.clear()
                 reader, _ = await connect_to_data_server(self.data_socket_path)
             
-            # if self.stored_signal is None:
-            #     pass
-            # else:
-            #     predictions = self.classifier.predict(self.stored_signal)
-            #     if self.verbose:
-            #         print(json.dumps(predictions))
-            #         sys.stdout.flush()
-            #     if self.saving:
-            #         self.saver.save_alarm(self.stored_signal, predictions)
-            #     if self.plotting:
-            #         self.classifier.plot(self.stored_signal, predictions)
+
     def start_test(self, path_to_test_signal, step=1000):
         test_data = np.load(path_to_test_signal)
         curr_idx = 0

@@ -1,7 +1,8 @@
 import os
 import sys
 import asyncio
-
+import multiprocessing as mp
+from multiprocessing import Manager
 scripts_folder = "scripts/"
 sys.path.append(scripts_folder)
 #script_curdir = os.path.dirname(os.path.abspath(__file__)) # директория исполняемого скрипта
@@ -9,7 +10,7 @@ sys.path.append(scripts_folder)
 
 from mainloop_async import Mainloop
 
-async def main():
+async def main(zone):
     mainloop = Mainloop(
         model_path="pipeline3.pkl",
         data_socket_path='/tmp/das_driver',
@@ -21,10 +22,20 @@ async def main():
         verbose=True,
         saving=False,
         save_path="/home/demostend/drozdov/zb-classification/RnD/data/16_11_2024_data",
-        zone_num=455,
+        zone_num=zone,
         max_files_count=250
     )
     await mainloop.start()
 
+def run_asyncio_main(zone):
+    asyncio.run(main(zone))
+
 if __name__ == '__main__':
-    asyncio.run(main())
+    zones = [455, 560]
+    processes = []
+    for zone in zones:
+        p = mp.Process(target=run_asyncio_main, args=(zone,))
+        processes.append(p)
+        p.start()
+    for p in processes:
+        p.join()

@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import json
 import asyncio
+from threading import Timer
 import matplotlib.pyplot as plt
 from detector import Detector
 from cropper import Cropper
@@ -13,21 +14,46 @@ script_folder  = 'scripts/'
 sys.path.append(script_folder)
 
 class Mainloop():
-    def __init__(self, model_path, data_socket_path, indent_time = 500, cooling_time=1000, max_time=10000,
-                 threshold=2, plotting=False, verbose=True,
-                 save_path=None, zone_num=None, max_files_count=250, saving=False):
+    """
+    model_path - путь откуда берется модель
+    data_socket_path - имя unix сокета через который получаем данные с драйвера
+    indent_time - отступ от начала тревоги (кол-во отсчетов)
+    cooling_time - время охлаждения
+    max_time - максимальное время сигнала
+    threshold - порог детектора (во сколько раз превышение СКО)
+    plotting - строить ли график тревоги?
+    verbose - выводить ли в консоль тревогу?
+    save_path - путь для сохранения тревог
+    zone_num - номер зоны на объекте
+    max_files_count - максимальное кол-во файлов для сохранения
+    saving - сохранять ли тревоги по директории save_path?
+    """
+    def __init__(self,
+                 model_path: str,
+                 data_socket_path: str,
+                 indent_time: int,
+                 cooling_time: int,
+                 max_time: int,
+                 threshold: float,
+                 plotting: bool,
+                 verbose: bool,
+                 save_path: str,
+                 zone_num: int,
+                 max_files_count: int,
+                 saving: bool):
         self.zone_num = zone_num
         self.detector = Detector(threshold)
         self.cropper = Cropper(indent_time, cooling_time, max_time, detector=self.detector)
         self.preprocessor = Preprocessor()
         self.classifier = Classifier(model_path=model_path, preprocessor=self.preprocessor)
-        
+
         self.verbose = verbose # bool: Выводить ли в консоль предсказания?
         self.plotting = plotting # bool: Строить ли графики предсказаний (для отладки)?
         self.saving = saving # bool: Сохранять ли тревоги в snapshots?
         self.driver_one_second = 1024 # настройка для драйвера
         self.driver_delimiter = bytearray(b'<<<EndOfData.>>>') # разделитель конца сообщения
         self.data_socket_path = data_socket_path
+        self.hit_count = 0
         
         with open('das_config.json') as json_file:
             self.config_dict = json.load(json_file)
@@ -35,7 +61,7 @@ class Mainloop():
             assert save_path, "You should specify save path"
             assert zone_num, "You should specify zone number"
             self.saver = Saver(save_path, zone_num, max_files_count)
-    
+                
     async def start(self):
 
         reader, _ = await connect_to_data_server(self.data_socket_path)
@@ -69,6 +95,7 @@ class Mainloop():
                         if self.saving:
                             self.saver.save_alarm(self.stored_signal, predictions)
                         if self.verbose:
+                            # вывожу в консоль
                             print(json.dumps(predictions))
                             sys.stdout.flush()
                 buffer.clear()

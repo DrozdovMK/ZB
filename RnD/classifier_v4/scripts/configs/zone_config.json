@@ -1,0 +1,16 @@
+[
+    {
+        "model_path" : "...",
+        "indent_time" : 500,
+        "cooling_time" : 1000,
+        "max_time" : 10000,
+        "threshold" : 2,
+        "plotting" : 0,
+        "verbose" : 1,
+        "saving" : 0,
+        "save_path" : "...",
+        "zone_num" : 455,
+        "max_files_count" : 250,
+        "data_socket_path" : "/tmp/das_driver"
+    }
+]

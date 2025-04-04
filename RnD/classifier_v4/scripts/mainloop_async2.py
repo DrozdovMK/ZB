@@ -61,14 +61,13 @@ class Mainloop():
 
         data_window = np.array([])
         while True:
-            data = sys.stdin.read(1024)
-            buffer += data
-            
+            data = sys.stdin.buffer.read(1024*2)
+            data=np.frombuffer(data,dtype=np.uint16)
+
             self.stored_signal = self.cropper(data)
             if self.stored_signal is None:
                 pass
             else:
-                print('signal collected', self.stored_signal.shape)
                 predictions = self.classifier.predict(self.stored_signal)
                 if self.plotting:
                     self.classifier.plot(self.stored_signal, predictions)
@@ -78,7 +77,7 @@ class Mainloop():
                     # вывожу в консоль
                     print(json.dumps(predictions))
                     sys.stdout.flush()
-                buffer.clear()
+                
 
     def start_test(self, path_to_test_signal, step=1000):
         test_data = np.load(path_to_test_signal)
@@ -111,6 +110,6 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise Exception(f"You should specify zone_config, sys.argv:{sys.argv}")
     zone_config = sys.argv[1]
-    
+    zone_config = json.loads(zone_config)
     mainloop = Mainloop(**zone_config)
-    mainloop.start()
+    asyncio.run(mainloop.start())

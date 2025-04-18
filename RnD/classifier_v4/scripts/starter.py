@@ -4,7 +4,6 @@ import asyncio
 import numpy as np
 import sys
 
-
 class Starter():
     def __init__(self,
                 driver_config_path="configs/das_config.json",

@@ -1,7 +1,8 @@
 import json
 import sys
 import asyncio
-async def dec():
-    process = await asyncio.create_subprocess_exec("echo", "mainloop_async2.py","asdsa")
+import numpy as np
 
-asyncio.run(dec())
+a = np.array([1,2,3])
+a = a[:, None]
+print(a.shape)

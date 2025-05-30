@@ -1,5 +1,0 @@
-{
-    "time_window"     : 10240,
-    "time_step"       : 1024,
-    "archive_lenght"  : 10
-}

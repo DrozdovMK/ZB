@@ -1,0 +1,14 @@
+{
+    "model_path":"./pipeline6.pkl",
+    "qOut": null,
+    "indent_time" : 500,
+    "cooling_time":1000,
+    "max_time":10000,
+    "threshold":3,
+    "plotting":false,
+    "verbose":true,
+    "save_path":null,
+    "zone_num":null,
+    "max_files_count":250,
+    "saving":false
+}

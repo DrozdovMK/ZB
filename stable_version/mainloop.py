@@ -3,7 +3,6 @@ import numpy as np
 import json
 from detector import Detector
 from cropper import Cropper
-from preprocessing import Preprocessor, central_chl
 from classifier import Classifier
 from saver import Saver
 
@@ -47,8 +46,7 @@ class Mainloop():
         """
         self.detector = Detector(threshold)
         self.cropper = Cropper(indent_time, cooling_time, max_time, detector=self.detector)
-        self.preprocessor = Preprocessor()
-        self.classifier = Classifier(model_path=model_path, preprocessor=self.preprocessor)
+        self.classifier = Classifier(model_path=model_path)
         
         self.verbose = verbose
         self.plotting = plotting
@@ -67,7 +65,8 @@ class Mainloop():
         """
         while True:
             buffer_data = sys.stdin.buffer.read(80000)
-            current_data = central_chl(np.frombuffer(buffer_data))
+            current_data = np.frombuffer(buffer_data)
+            current_data = current_data[5:10000:10]
             self.stored_signal = self.cropper(current_data)
             if self.stored_signal is None:
                 pass

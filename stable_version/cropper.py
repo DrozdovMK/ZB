@@ -15,7 +15,7 @@ class Cropper():
         при отсутствии срабатывания Detector)
         в) Гарантии отступа от начала воздействия.
     """
-    def __init__(self, indent_time=500, cooling_time=1000, max_time=10000, detector=Detector()):
+    def __init__(self, indent_time=500, cooling_time=1000, max_time=10000, verbose=False, detector=Detector):
         self.indent_time = indent_time # кол-во отсчетов для отступа
         self.max_cooling_time = cooling_time # кол-во отсчетов охлаждения
         self.max_time = max_time # максимальное кол-во отсчетов
@@ -24,6 +24,7 @@ class Cropper():
         self.cached_frames = np.array([]) # массив для хранения фреймов
         self.alarm_flag = False # флажок сигнализирующий о том что произошла тревога
         self.curr_cooling_time = 0 # текущее время охлаждения
+        self.verbose = verbose
         
     def indent_first_frame(self, frame_current, frame_previous):
         frame_max = np.max(frame_current)
@@ -75,6 +76,9 @@ class Cropper():
                                 self.cached_frames,
                                 frame
                             ])
+                    if self.verbose:
+                        self.send_meassge(message="analysis")
+
                 else:
                     # Событие: детектор НЕ сработал
                     if self.alarm_flag == False:
@@ -96,10 +100,14 @@ class Cropper():
                                 self.cached_frames,
                                 frame
                             ])
+                            if self.verbose:
+                                self.send_meassge(message="analysis")
         
-        self.last_frame = frame
+        self.last_frame = frame    
         
+    
+    def send_meassge(self, message):
+        print(message, end="")
         sys.stdout.flush()
-        
 
 

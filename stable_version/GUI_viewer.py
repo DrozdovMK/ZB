@@ -289,7 +289,7 @@ class LabelsTextWidget(QWidget):
         layout = QVBoxLayout()
         self.text_edit = QTextEdit(self)
         self.text_edit.setPlaceholderText("Введите типы воздействий через Enter...")
-        self.text_edit.setText("\n".join(["hit", "hit_series", "saw", "perelaz", "unknown"]))
+        self.text_edit.setText("\n".join(["wind", "hit", "hit_series", "saw", "perelaz", "unknown"]))
         self.submit_button = QPushButton("Выбрать классы", self)
         self.submit_button.clicked.connect(self.change_labels)
         layout.addWidget(self.text_edit)

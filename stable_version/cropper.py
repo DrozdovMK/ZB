@@ -27,6 +27,11 @@ class Cropper():
         self.verbose = verbose
         
     def indent_first_frame(self, frame_current, frame_previous):
+        """
+        Метод, обеспечивающий отступ в self.indent_time 
+        в записи сигнала перед началом воздействия
+        (это гаранирует что будет записано начало воздействия)
+        """
         frame_max = np.max(frame_current)
         frame_median = np.median(frame_current)
         frame_min = np.min(frame_current)
@@ -46,7 +51,13 @@ class Cropper():
             return concated_frames
     
     def __call__(self, frame):
+        """
+        При работе системы, классификатор вызывает в бесконечном цикле
+        Каждые 500 мс этот метод. Ниже представлена логика событий, которые
+        происходят в зависимости от того, срабатывает или нет детектор
+        """
         if not self.detector.is_fitted:
+            # в первую секунду запоминаем СКО в "спокойном" режиме системы
             self.detector.fit(frame)
         else:
             if len(self.cached_frames) > self.max_time:
@@ -77,7 +88,7 @@ class Cropper():
                                 frame
                             ])
                     if self.verbose:
-                        self.send_meassge(message="analysis")
+                        self.send_message(message="analysis")
 
                 else:
                     # Событие: детектор НЕ сработал
@@ -101,12 +112,12 @@ class Cropper():
                                 frame
                             ])
                             if self.verbose:
-                                self.send_meassge(message="analysis")
+                                self.send_message(message="analysis")
         
         self.last_frame = frame    
         
     
-    def send_meassge(self, message):
+    def send_message(self, message):
         print(message, end="")
         sys.stdout.flush()
 

@@ -25,6 +25,9 @@ class Classifier():
     def predict(self, signal: np.ndarray) -> dict[str,float]:
         """
         Метод для предсказания метки класса по полученному сигналу
+        Этот метод должен подавать на вход классификатора данные в формате long_df
+        А возвращать в формате, который требуется дальше (Кирилл просит json с вероятностями по классам)
+        Поэтому я возвращаю dict
         
         signal (np.ndarray) - обрезанный после cropper сигнал
         Возвращает:
@@ -43,6 +46,10 @@ class Classifier():
         return model_predictions
     
     def plot(self, signal, model_predictions):
+        """
+        Метод для отладки, который нужен чтобы строить графики сырого сигнала
+        и соответствующего распределения классификатора по классам
+        """
         fig, ax = plt.subplots(1, 2, figsize = (10,6))
         ax[0].plot(signal)
         ax[0].set_xlabel('Time, ms')

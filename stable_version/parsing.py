@@ -13,31 +13,17 @@ class SimpleParser():
     который используется в tsfresh (далее этот формат называется longDataFrame)
     Ссылка на документацию: https://tsfresh.readthedocs.io/en/latest/text/data_formats.html
     
-    Класс имеет методы:
-    * online_transform - метод для перевода массива numpy в longDataFrame.
-    (Используется при работе в режиме реального времени на объекте)
-    
-    * make_tsfresh_structure_from_simple_directory - метод для парсинга сохраненных данных
-    из директории в которой хранятся hdf5 файлы в формате:
-    один hdf5 файл - одно воздействие. 
-    Возвращает кортеж (longDataFrame, labels)
-    
-    * make_tsfresh_structure_from_nested_directory - метод для парсинга сохраненных данных
-    из директории в которой файлы хранятся во вложенном формате 
-    (зона -> день -> час -> hdf5 файл)
-    Возаращает кортеж (longDataFrame, labels)
+    Историческая справка:
+    Раньше данные каждого типа воздействия писались в соответствующий hdf5 файлы.
+    Потом структура сохранения файлов поменялась (принято решение о использовании
+    более надежной и отказоустойчивой системе хранения). Однако данные записанные
+    когда-то давно остались, их не хотелось выкидывать. Поэтому был создан этот метод
     """
     def __init__(self):
         pass
 
     def get_long_df(self, directory_path: str):
         '''
-        {Историческая справка:
-        Раньше данные каждого типа воздействия писались в соответствующий hdf5 файлы.
-        Потом структура сохранения файлов поменялась (принято решение о использовании
-        более надежной и отказоустойчивой системе хранения). Однако данные записанные
-        когда-то давно остались, их не хотелось выкидывать. Поэтому был создан этот метод}
-        
         * directory_path - директория в которой хранятся hdf5 файлы.
         Названия файлов означают метку класса, которой соответствуют 
         сигналы внутри.
@@ -47,10 +33,10 @@ class SimpleParser():
         saw.hdf5 (75 воздействий)
         perelaz.hdf5 (54 воздействия)
         
-        На выходе будет (data, label) 
-        * data pd.DataFrame в соответствии с форматом для дальнейшего extract_features
+        Возаращает кортеж (longDataFrame, labels)
+        * longDataFrame pd.DataFrame в соответствии с форматом для дальнейшего extract_features
         библиотеки tsfresh (longDataFrame)
-        * label в формате pd.Series 
+        * labels в формате pd.Series 
         (например pd.Series([hit, hit, ..., saw, perelaz, hit, ...]))
         '''
         long_df = pd.DataFrame()
@@ -79,17 +65,14 @@ class SimpleParser():
         return long_df.reset_index(drop=True), pd.Series(labels)
 
 class NestedParser():
-    def __init__(self):
-        pass
-    def get_long_df(self, directory_path):
-        """
-        {Историческая справка:
-        Структура хранения файлов во вложенном (nested) формате (см. пример ниже)
-        используется для того, чтобы разделить тревоги по часам, чтобы в случае отказа
-        системы или повреждения файла были потеряны тревоги за один час а не все
-        тревоги записанные ранее} 
-        
-        Актуальная версия для трансформатора датасета
+    """
+    Историческая справка: 
+    Структура хранения файлов во вложенном (nested) формате (см. пример ниже)
+    используется для того, чтобы разделить тревоги по часам, чтобы в случае отказа
+    системы или повреждения файла были потеряны тревоги за один час а не все
+    тревоги записанные ранее
+    
+    Актуальная версия для трансформатора датасета
         На вход: директория со вложенными папками, например:
         - Общее название (название объекта)
             - 566 (номер зоны)
@@ -114,6 +97,22 @@ class NestedParser():
         alarm {i}  является датасетом с аттрибутами: истинная метка класса, порог классификации и т.д.
         
         На выходе ожидается long_dataframe в соответствие с требованиями от sklearn
+    """
+    def __init__(self, verbose:bool =False):
+        """
+        verbose - выводить ли информацию о том, что в датасете
+        встречается метка unknown
+        """
+        self.verbose = verbose 
+    def get_long_df(self, directory_path):
+        """
+        directory_path - путь до папки в которой лежат сохраненные воздействия
+        
+        Возаращает кортеж (longDataFrame, labels)
+        * longDataFrame pd.DataFrame в соответствии с форматом для дальнейшего extract_features
+        библиотеки tsfresh (longDataFrame)
+        * labels в формате pd.Series 
+        (например pd.Series([hit, hit, ..., saw, perelaz, hit, ...]))
         """
         long_df = pd.DataFrame() # датафрейм для данных
         labels = []
@@ -139,10 +138,11 @@ class NestedParser():
                             })
                             if "label" not in hdf_file[key].attrs.keys():
                                 labels.append("unknown")
-                                print("Found unknown label in zone {} \ndate: {}".format(
-                                    zone,
-                                    hdf_file[key].attrs["date_time"]
-                                ))
+                                if self.verbose:
+                                    print("Found unknown label in zone {} \ndate: {}".format(
+                                        zone,
+                                        hdf_file[key].attrs["date_time"]
+                                    ))
                             else:
                                 labels.append(hdf_file[key].attrs["label"])
                             long_df = pd.concat([long_df, temp_df])
@@ -152,13 +152,8 @@ class NestedParser():
 class LongJoiner():
     """
     Класс предназначени для соединения данных, которые были взяты из разных источников:
-    1) Папок со вложенной структурой (список путей в paths_to_nested)
-    2) Папок без вложенной структуры (один hdf5 - один тип воздействий) (список путей в old_paths)
     
-    Парсинг происходит при вызове инициализатора. При вызове __init__ возвращается 
-    pd.DataFrame с тремя колонками: id, time, signal_raw
-    
-    Есть вспомогательные методы ():
+    Есть вспомогательные методы:
     * concat_datasets - объединяет данные с нескольких источников
     
     * rename_idxs - переименовывает id у воздействий после склейки
@@ -189,9 +184,8 @@ class LongJoiner():
     
     def concat_datasets(self, datasets_list: list[tuple]) -> tuple:
         """
-        Метод для объединения нескольких датасетов из разных
-        хранилищ данных, принимает на вход list состоящий из
-        longDataFrame, склеивает из в один longDataFrame,
+        Берет на вход list в котором лежат tuple(longDataFrame, labels) и
+        возвращает один tuple(longDataFrame, labels),
         делает правильный порядок индексов, дропает какие-то
         классы, какие-то переименовывает, может делать downsampling
         для гарантирования что всех классов одинаковое кол-во

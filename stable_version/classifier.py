@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+# здесь важно импортировать из preprocessing все (*)!
+# Хотя в коде нет явного вызова модулей из preprocessing,
+# классификтор состоит из блоков, описанных в preprocessing
 from preprocessing import *
 
 class Classifier():

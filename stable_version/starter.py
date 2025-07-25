@@ -16,7 +16,7 @@ if __name__ == '__main__':
         print("no zone")
         zone_num=0
         
-    mainloop = Mainloop(model_path="pipeline5.pkl",
+    mainloop = Mainloop(model_path="pipeline_with_kashira.pkl",
                         indent_time=500,
                         cooling_time=2000,
                         max_time=10000,

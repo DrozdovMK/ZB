@@ -8,6 +8,5 @@
   "verbose": true,
   "saving": false,
   "save_path": "./alarms",
-  "zone_num": null,
   "max_files_count": 250
 }

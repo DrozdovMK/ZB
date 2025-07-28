@@ -1,8 +1,9 @@
 import os
 import sys
+import json
 scripts_folder = "scripts/"
-sys.path.append(scripts_folder)
-script_curdir = os.path.dirname(os.path.abspath(__file__)) # директория исполняемого скрипта
+sys.path.append(scripts_folder) # add folder with scripts to PATH 
+script_curdir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_curdir)
 
 
@@ -13,20 +14,13 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         zone_num = sys.argv[1]  # 1-st argument from command line
     else:
-        print("no zone")
-        zone_num=0
+        raise Exception("you must specify zone number as argument in command line")
         
-    mainloop = Mainloop(model_path="pipeline_with_kashira.pkl",
-                        indent_time=500,
-                        cooling_time=2000,
-                        max_time=10000,
-                        threshold=3,
-                        plotting=False,
-                        verbose=True,
-                        saving=False,
-                        save_path="./alarms",
-                        zone_num=zone_num,
-                        max_files_count=250)
+    with open("classifier_config.json", "r", encoding="utf-8") as file:
+        config = json.load(file)
+        config["zone_num"] = zone_num
+    
+    mainloop = Mainloop(**config)
     mainloop.start()
 
 

@@ -1,0 +1,12 @@
+{
+  "model_path": "pipeline_with_kashira.pkl",
+  "indent_time": 500,
+  "cooling_time": 2000,
+  "max_time": 10000,
+  "threshold": 3,
+  "plotting": false,
+  "verbose": true,
+  "saving": false,
+  "save_path": "./alarms",
+  "max_files_count": 250
+}

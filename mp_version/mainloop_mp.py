@@ -3,7 +3,6 @@ import numpy as np
 import json
 from detector import Detector
 from cropper import Cropper
-from preprocessing import Preprocessor, central_chl
 from classifier import Classifier
 from saver import Saver
 import multiprocessing as mp
@@ -73,8 +72,7 @@ class Mainloop():
         """
         self.detector = Detector(threshold)
         self.cropper = Cropper(indent_time, cooling_time, max_time, detector=self.detector)
-        self.preprocessor = Preprocessor()
-        self.classifier = Classifier(model_path=model_path, preprocessor=self.preprocessor)
+        self.classifier = Classifier(model_path=model_path)
         self.qOut   = qOut
         self.verbose = verbose
         self.plotting = plotting
@@ -143,7 +141,7 @@ if __name__ == "__main__":
     # Номер зоны задается со стороны бэкенда Кирилла, мне он приходит как
     # параметр командной строки (sys.argv[1])
     zone_num = ...
-    mainloop = Mainloop(model_path="pipeline2.pkl",
+    mainloop = Mainloop(model_path="pipeline_with_kashira.pkl",
                         indent_time=500,
                         cooling_time=1000,
                         max_time=10000,
